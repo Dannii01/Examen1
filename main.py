@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from db import MongoDriver
 
 consulta = "zapatos"
 driver = webdriver.Chrome()
@@ -14,6 +15,8 @@ search_button.click()
 
 shoes = driver.find_elements(By.CSS_SELECTOR, "#skip-to-products >div")
 
+mongodb = MongoDriver()
+
 for card in shoes:
    try:
         title = card.find_element(By.CSS_SELECTOR, "div > figure > a.product-card__link-overlay").text
@@ -25,19 +28,13 @@ for card in shoes:
         print(color)
         print(f"{price}")
         shoes_actual = {
-             "consulta": consulta,
-             "resultado": {
                   "title": title,
                   "subtitle": subtitle,
                   "color": color,
                   "price": price,
              }
-        }
 
-        db = mongo_client.get_database('db_shoes')
-        collection = db.get_collection(f'buscozapatos')
-
-        collection.insert_one(shoes_actual)
+        mongodb.insert_record(record=shoes_actual, username="zapatos")
 
         print("++++++++++++++++++++++++++++++++")
    except Exception as e:
